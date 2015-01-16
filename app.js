@@ -14,48 +14,55 @@ else
   console.log('pureworld in browser');
 }
 
-// -- stdlib --
-window.pure = function(a)
+window.seq = function(x, y)
 {
-  return function(_)
+  return function()
   {
-    return a;
+    return x(), y();
   };
-};
-// pure :: a -> IO a
-window.bind = function(m)
+}
+
+window.action = function(x)
 {
-  return function(f)
+  return function(y)
   {
-    return function(_)
-    {
-      return f(m())();
-    };
+    return y ? action(seq(x, y)) : x();
   };
-};
-// bind :: IO a -> (a -> IO b) -> IO b
-window.exec = function(m)
+}
+
+// log :: a -> IO b
+// log :: a -> IO c -> IO c
+
+// seq :: IO a -> IO b -> IO b
+
+window.bind = function(x, y)
 {
-  return m();
-};
-// exec :: IO a -> a
+  return function()
+  {
+    return y(x())();
+  };
+}
+
 window.wrap = function(f)
 {
-  return function(a)
+  return function(x)
   {
-    return function(_)
+    return action(function()
     {
-      return f(a);
-    };
-  };
-};
+      return f(x);
+    });
+  }
+
+}
+
+
+window.log = wrap(console.log);
+
 // -- runtime --
 Object.defineProperty(window, "world",
 {
-  set: exec
+  set: function(m)
+  {
+    return m();
+  }
 });
-
-// wrap :: (a -> b) -> (a -> IO b)
-window.log = wrap(console.log.bind(console));
-
-world = log('------------------------');
