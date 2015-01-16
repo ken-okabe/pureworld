@@ -61,8 +61,8 @@ window.log = wrap(console.log);
 // -- runtime --
 Object.defineProperty(window, "world",
 {
-  set: function(m)
+  set: function(w)
   {
-    return m();
+    return w();
   }
 });
