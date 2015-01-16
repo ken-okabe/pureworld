@@ -4,10 +4,53 @@
 
 "use strict";
 
-require('./app');
+var pureworld = require('./app');
 
-log("1")(); // :: b
-log("1")(log("2"))(); // :: IO c
+Object.keys(pureworld)
+  .map(function(key)
+  {
+    window[key] = pureworld[key];
+  });
 
-world = (log('-------------------'));
-world = (log("1"))(log("2"))(log("3"))(log("4"));
+
+
+var asyncF = function(callback)
+{
+  setTimeout(function()
+  {
+    for (var i = 0; i < 1000000000; i++)
+    {
+
+    };
+
+    callback("async process Done!");
+  }, 0);
+};
+
+var async = wrap(asyncF(function(msg)
+{
+  world = log(msg);
+
+  return msg;
+}));
+
+
+world =
+  (log(1))
+  (async)
+  (log(3));
+
+//1
+//3
+//async process Done!
+
+world = (log(1))
+  (bind((async), (log(x))));
+
+//should be
+//1
+//async process Done!
+//3
+
+//in fact
+//ReferenceError: x is not defined
